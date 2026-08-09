@@ -81,28 +81,28 @@ Every LLM dependency is controlled by the `MOCK_LLM` environment variable:
    pip install -r requirements.txt
 Start Server:
 
-Bash
+Bash:
 uvicorn main:app --host 0.0.0.0 --port 7860
 Option B: Local Run via Docker Container
 Build Docker Image:
 
-Bash
+Bash:
 docker build -t zepto-support-assistant .
 Run Docker Container:
 
-Bash
+Bash:
 docker run -p 7860:7860 -e MOCK_LLM=1 zepto-support-assistant
 Example Call Transcripts (Graded Baseline: MOCK_LLM=1)
 Test Case 1: Policy Retrieval Query (policy_question)
 HTTP Request:
 
-Bash
+Bash:
 curl -X POST "[http://127.0.0.1:7860/ask](http://127.0.0.1:7860/ask)" \
      -H "Content-Type: application/json" \
      -d '{"query": "What is the return policy for damaged items?"}'
 Raw JSON Response:
 
-JSON
+JSON:
 {
   "answer": "Based on the retrieved context: Grocery and perishable items may be reported for a return within 24 hours of delivery if damaged, spoiled, or incorrect; non-perishable packaged items may be returned within 7 days of delivery in unopened",
   "sources": [
