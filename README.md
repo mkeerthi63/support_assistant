@@ -22,7 +22,7 @@ The original keyword router misrouted paraphrased questions such as *"Can I call
 
 Note: the evaluation set is small and was written by the author, so these numbers indicate relative improvement rather than production accuracy.
 
-Run the unit tests (no API key needed; the LLM client is faked):
+Run the unit tests (no API key needed; the LLM client is faked). GitHub Actions runs the tests and `evaluate.py` on every push (`.github/workflows/tests.yml`):
 
 ```bash
 pytest -q test_main.py
