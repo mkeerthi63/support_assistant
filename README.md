@@ -6,6 +6,28 @@ The application uses **ChromaDB** for local vector storage, **Sentence Transform
 
 The system is designed with an offline-first graded baseline using `MOCK_LLM=1`, allowing the application to run without external API keys or network-dependent LLM calls.
 
+## Evaluation Results
+
+Measured with `python evaluate.py` on a hand-labeled set of 32 queries (`eval_set.json`: 24 policy questions mapped to their source document, 8 off-topic questions).
+
+| Metric | Result |
+| ------ | ------ |
+| Retrieval Hit@1 | 91.7% |
+| Retrieval Hit@3 | 100.0% |
+| Retrieval MRR | 0.958 |
+| Intent routing accuracy, keyword router (original) | 43.8% |
+| Intent routing accuracy, hybrid keyword + semantic router | 96.9% |
+
+The original keyword router misrouted paraphrased questions such as *"Can I call Zepto on the phone?"* or *"How long is a voucher valid?"* because they contain none of the hard-coded keywords. The hybrid router (`ROUTER_MODE=hybrid`, default) also treats a query as a policy question when its nearest policy document is within a cosine distance of `0.75`. Remaining miss: *"Will I get a replacement for broken eggs?"*.
+
+Note: the evaluation set is small and was written by the author, so these numbers indicate relative improvement rather than production accuracy.
+
+Run the unit tests (no API key needed; the LLM client is faked):
+
+```bash
+pytest -q test_main.py
+```
+
 ---
 
 # 1. Project Structure
@@ -344,7 +366,16 @@ The LLM receives:
 
 The generated response is validated against the Pydantic schema.
 
-If schema validation fails, the system can retry generation with corrective feedback for up to two retry attempts.
+If schema validation fails, the validation errors are sent back to the model and generation is retried up to two times. If every attempt fails, the assistant falls back to the extractive answer from the top retrieved document. Cited sources that were not in the retrieved context are dropped.
+
+Example:
+
+```bash
+export GROQ_API_KEY=your_key_here
+MOCK_LLM=0 uvicorn main:app --host 0.0.0.0 --port 7860
+```
+
+In both modes `confidence` is no longer hard-coded: the extractive answer uses the cosine similarity of the top retrieved document, and the LLM answer reports its own confidence.
 
 ---
 
